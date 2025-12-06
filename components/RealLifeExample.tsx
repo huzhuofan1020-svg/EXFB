@@ -8,18 +8,6 @@ interface Props {
   data: DistributionData[];
 }
 
-// 简单的组合数计算函数用于展示
-function getCombination(n: number, k: number): number {
-  if (k < 0 || k > n) return 0;
-  if (k === 0 || k === n) return 1;
-  if (k > n / 2) k = n - k;
-  let res = 1;
-  for (let i = 1; i <= k; i++) {
-    res = res * (n - i + 1) / i;
-  }
-  return Math.round(res);
-}
-
 export const RealLifeExample: React.FC<Props> = ({ n, p, stats, data }) => {
   // 根据概率 p 选择不同的生活场景
   const getScenario = (p: number) => {
@@ -78,24 +66,15 @@ export const RealLifeExample: React.FC<Props> = ({ n, p, stats, data }) => {
   const scenario = getScenario(p);
   
   // 获取众数
-  const modeValRaw = stats.mode;
-  const isBiModal = Array.isArray(modeValRaw);
-  const k = isBiModal ? modeValRaw[0] : modeValRaw;
-  
-  const modeStr = isBiModal
-    ? `${modeValRaw[0]} 或 ${modeValRaw[1]}` 
-    : modeValRaw.toString();
+  const modeVal = Array.isArray(stats.mode) ? stats.mode[0] : stats.mode;
+  const modeStr = Array.isArray(stats.mode) 
+    ? `${stats.mode[0]} 或 ${stats.mode[1]}` 
+    : stats.mode.toString();
 
   // 查找众数对应的概率值
   // 即使是双峰，两个峰值的概率也是相等的，取第一个即可
-  const modeProb = data.find(d => d.k === k)?.prob || 0;
+  const modeProb = data.find(d => d.k === modeVal)?.prob || 0;
   const modeProbPercent = (modeProb * 100).toFixed(2);
-
-  // 计算过程变量
-  const q = 1 - p;
-  const nCk = getCombination(n, k);
-  const pk = Math.pow(p, k);
-  const qnk = Math.pow(q, n - k);
 
   return (
     <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-5 shadow-sm flex flex-col gap-3 transition-all duration-300">
@@ -119,38 +98,8 @@ export const RealLifeExample: React.FC<Props> = ({ n, p, stats, data }) => {
                 <span className="font-medium">💡 概率最大的结果：</span>
                 <span className="text-indigo-600 font-bold text-lg">{modeStr} 次</span>
             </div>
-            
-            <div className="text-xs text-slate-400 text-right mb-2">
+            <div className="text-xs text-slate-400 text-right">
                 (该结果发生的概率约为 {modeProbPercent}%)
-            </div>
-
-            <div className="mt-2 pt-2 border-t border-slate-100 text-xs font-mono bg-slate-50 p-2 rounded">
-                <div className="mb-2 text-indigo-800 font-bold">计算步骤 (k={k}):</div>
-                
-                <div className="space-y-2 overflow-x-auto">
-                    <div className="whitespace-nowrap">
-                        <span className="text-slate-400">公式:</span> P(X={k}) = C({n},{k}) · p<sup>{k}</sup> · (1-p)<sup>{n}-{k}</sup>
-                    </div>
-                    
-                    <div className="pl-2 border-l-2 border-indigo-100 space-y-1">
-                        <div>
-                            <span className="text-slate-400 w-4 inline-block">1.</span> 
-                            组合数 C({n},{k}) = <span className="text-indigo-600 font-bold">{nCk}</span>
-                        </div>
-                        <div>
-                            <span className="text-slate-400 w-4 inline-block">2.</span> 
-                            成功率 p<sup>{k}</sup> = {p}^{k} ≈ <span className="text-indigo-600">{pk.toExponential(4)}</span>
-                        </div>
-                        <div>
-                            <span className="text-slate-400 w-4 inline-block">3.</span> 
-                            失败率 q<sup>{n-k}</sup> = {(1-p).toFixed(2)}^{n-k} ≈ <span className="text-indigo-600">{qnk.toExponential(4)}</span>
-                        </div>
-                    </div>
-
-                    <div className="pt-1 border-t border-slate-200 font-bold text-indigo-700">
-                        结果 = {nCk} × {pk.toExponential(3)} × {qnk.toExponential(3)} ≈ {(nCk * pk * qnk).toFixed(4)} ({modeProbPercent}%)
-                    </div>
-                </div>
             </div>
         </div>
     </div>
