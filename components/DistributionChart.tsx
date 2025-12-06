@@ -45,7 +45,7 @@ export const DistributionChart: React.FC<Props> = ({ data }) => {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart 
             data={data} 
-            margin={{ top: 10, right: 10, left: -20, bottom: 40 }}
+            margin={{ top: 10, right: 10, left: -20, bottom: 50 }}
             barCategoryGap="2%"
           >
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
